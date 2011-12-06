@@ -15,13 +15,30 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
   def generate_calendar_response(ref_id)
     object = SiriAddViews.new
     object.make_root(ref_id)
-    object.views << SiriAssistantUtteranceView.new("Here is your trakt calendar!")
+    if Trakt::User::Calendar.new.results.empty?
+      object.views << SiriAssistantUtteranceView.new("Looks like nothing's on tonight. Might I suggest a good movie?")
+      object
+    else
+      object.views << SiriAssistantUtteranceView.new("The following shows are airing tonight:")
+      episode_count = 0
+      episodes = Trakt::User::Calendar.new.results.first['episodes']
+      episodes_airing = ""
+      episodes.each do |calendar_result|
+        episode_count = episode_count + 1
+        if episodes.count == episode_count
+          episodes_airing << " and #{calendar_result['show']['title']}"
+        else
+          episodes_airing << "#{calendar_result['show']['title']}"
+        end
+        unless episodes.count == 1 or (episode_count == (episodes.count - 1)) or episode_count = episodes.count
+          episodes_airing << ", "
+        end
 
-    episodes = Trakt::User::Calendar.new.results.first['episodes']
-    episodes.each do |calendar_result|
-      object.views << SiriAssistantUtteranceView.new(calendar_result['show']['title'])
+
+      end
+      object.views << SiriAssistantUtteranceView.new(episodes_airing)
+      object
     end
-    object
   end
 
   listen_for /what's on tv tonight/i do
@@ -30,5 +47,3 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
   end
 
 end
-
-
