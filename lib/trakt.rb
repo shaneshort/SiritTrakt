@@ -9,7 +9,7 @@ module Trakt
   end
 
   class << self
-    attr_accessor  :username, :password, :api_key
+    attr_accessor  :username, :password, :api_key, :utc_offset
   end
 
   class Base
@@ -34,8 +34,18 @@ module Trakt
 
     class Calendar < Trakt::Base
 
-      def url
-        "#{base_url}/user/calendar/shows.json/#{Trakt::api_key}/#{Trakt::username}/#{Date.today.to_s}/1"
+     def url
+        unless Trakt::utc_offset.nil? 
+          if Trakt::utc_offset < 0
+            date = Date.parse((Time.now + ((Trakt::utc_offset.to_i*-1)*60)).to_s).to_s
+          else
+            date = Date.parse((Time.now - ((Trakt::utc_offset.to_i)*60)).to_s).to_s
+          end
+        else 
+          date = Date.today
+        end
+        puts "Date: #{date}"
+        "#{base_url}/user/calendar/shows.json/#{Trakt::api_key}/#{Trakt::username}/#{date}/1"
       end
 
     end

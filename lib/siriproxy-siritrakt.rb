@@ -10,6 +10,7 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
     Trakt::api_key = config['trakt_api_key']
     Trakt::username = config['trakt_username']
     Trakt::password = config['trakt_password']
+    Trakt::utc_offset = config['trakt_utc_offset'] || nil
   end
 
   def generate_calendar_response(ref_id)
